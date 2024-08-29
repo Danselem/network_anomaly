@@ -1,4 +1,24 @@
 # external requirements
-dvc==2.26.2
-pre-commit==2.20.0
-great_expectations==0.15.23
+dvc
+pre-commit
+great_expectations
+ipywidgets
+hyperopt
+mlflow
+python-dotenv
+fastapi
+pandas
+prefect
+tqdm
+requests
+joblib
+pyarrow
+psycopg
+psycopg-binary
+evidently
+numpy
+scikit-learn
+jupyter
+matplotlib
+xgboost
+ydata-profiling
