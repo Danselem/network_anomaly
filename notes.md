@@ -5,3 +5,17 @@ cookiecutter https://dagshub.com/DagsHub/Cookiecutter-MLOps.git
 
 
 cp -r /Users/daniel/.cookiecutters/Cookiecutter-MLOps/ .
+
+Link for git branch divergence: https://jvns.ca/blog/2024/02/01/dealing-with-diverged-git-branches/
+
+```bash
+git pull --rebase
+git push --force
+git reset --hard origin/main
+```
+
+```bash
+pip install --upgrade pip && pip install -r requirements.txt
+```
+
+Write a blog on Linux commands
