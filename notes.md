@@ -18,4 +18,8 @@ git reset --hard origin/main
 pip install --upgrade pip && pip install -r requirements.txt
 ```
 
+https://www.warp.dev/terminus/undo-git-add
+
+git push origin HEAD:main
+
 Write a blog on Linux commands
