@@ -88,6 +88,5 @@ coverage.xml
 # Mypy cache
 .mypy_cache/
 
-.venv/
+
 .venv
-.env

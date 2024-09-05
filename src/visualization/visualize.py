@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 from numpy.typing import ArrayLike
 from sklearn.metrics import confusion_matrix
+from pathlib import Path
 
 
 def plot_confusion_matrix(y_real: ArrayLike, y_pred: ArrayLike,
@@ -17,6 +18,7 @@ def plot_confusion_matrix(y_real: ArrayLike, y_pred: ArrayLike,
     Returns:
         None
     """
+    fig_path = Path("./reports/figures")
     cm = confusion_matrix(y_real, y_pred)
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111)
@@ -30,4 +32,5 @@ def plot_confusion_matrix(y_real: ArrayLike, y_pred: ArrayLike,
         for j in range(2):
             plt.text(j, i, f"{cm[i, j]}", ha='center', va='center',
                      color='red')
-    plt.savefig(f"{train_or_test}_confusion_matrix.png")
+    plt.savefig(fig_path / f"{train_or_test}_confusion_matrix.png", 
+                dpi=300, bbox_inches='tight', pad_inches = 0.1)

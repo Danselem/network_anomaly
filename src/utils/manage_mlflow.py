@@ -4,6 +4,7 @@ import random
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
+import pandas as pd
 from dotenv import load_dotenv
 from mlflow.tracking import MlflowClient
 from mlflow.models import infer_signature
@@ -13,6 +14,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from src.visualization.visualize import plot_confusion_matrix
+from pathlib import Path
 from src import logger
 
 
@@ -65,7 +67,7 @@ def register_best_model(model_family: str, loss_function: str) -> None:
     experiment = client.get_experiment_by_name(f"{model_family}_experiment")
     best_run = client.search_runs(
         experiment_ids=[experiment.experiment_id],
-        order_by=[f"metrics.{loss_function} ASC"]  # Corrected to ASC for minimum loss
+        order_by=[f"metrics.{loss_function} DESC"] 
     )[0]
 
     # Register the best model
@@ -85,7 +87,7 @@ def register_best_xgboost_experiment(
     Returns:
         run_id: The ID of the run in MLflow.
     """
-    total_samples_size = x_train.shape[0]
+
     x_train, x_val, y_train, y_val = train_test_split(
         x_train, y_train, test_size=0.2, random_state=seed)
     
@@ -126,16 +128,39 @@ def register_best_xgboost_experiment(
         mlflow.log_metric("train_roc_auc", roc_auc_score(y_train, train_probs))
         mlflow.log_param("loss_function", loss_function)
         mlflow.xgboost.log_model(model, "model", signature=signature,)
+        
+        metrics = pd.DataFrame({
+                                "accuracy": [accuracy_score(y_val, test_hat)],
+                                "f1": [f1_score(y_val, test_hat, pos_label=1)],
+                                "precision": [precision_score(y_val, test_hat, pos_label=1)],
+                                "recall": [recall_score(y_val, test_hat, pos_label=1)],
+                                "roc_auc": [roc_auc_score(y_val, test_probs)]
+        })
+        reports_path = Path("./reports")
+        metrics_path = reports_path / "metrics.csv"
+        metrics.to_csv(metrics_path, index=False)
+        
+        train_metrics = pd.DataFrame({
+                                "train_accuracy": [accuracy_score(y_train, train_hat)],
+                                "train_f1": [f1_score(y_train, train_hat, pos_label=1)],
+                                "train_precision": [precision_score(y_train, train_hat, pos_label=1)],
+                                "train_recall": [recall_score(y_train, train_hat, pos_label=1)],
+                                "train_roc_auc": [roc_auc_score(y_train, train_probs)],
+                                })
+        
+        train_metrics_path = reports_path / "training_metrics.csv"
+        train_metrics.to_csv(train_metrics_path, index=False)
 
         # Ensure file paths are correct
+        fig_path = Path("./reports/figures")
         plot_confusion_matrix(y_train, train_hat, "train")
-        mlflow.log_artifact("train_confusion_matrix.png")
+        mlflow.log_artifact(fig_path / "train_confusion_matrix.png")
         plot_confusion_matrix(y_val, test_hat, "test")
-        mlflow.log_artifact("test_confusion_matrix.png")
+        mlflow.log_artifact(fig_path / "test_confusion_matrix.png")
 
         # Clean up files
-        os.remove("train_confusion_matrix.png")
-        os.remove("test_confusion_matrix.png")
+        # os.remove("train_confusion_matrix.png")
+        # os.remove("test_confusion_matrix.png")
         mlflow.log_artifact("params.yaml")
         mlflow.log_artifact("dvc.yaml")
         # mlflow.log_artifact("data/processed/heart_train_cleaned.parquet")

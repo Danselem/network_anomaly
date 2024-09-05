@@ -1,5 +1,5 @@
 modeling:
-  n_trials: 10
+  n_trials: 5
   model_family: xgboost # random_forest
   objective_function: Logloss # Logloss, CrossEntropy
   loss_function: F1 # Precision, F1, Accuracy
