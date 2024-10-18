@@ -23,3 +23,10 @@ matplotlib
 xgboost
 ydata-profiling
 flake8
+ruff
+black
+isort
+nbqa
+pyupgrade
+mypy
+pre-commit-hooks

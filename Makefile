@@ -35,6 +35,7 @@ clean:
 
 ## To use the pre-commit hooks
 pre-commit-install:
+	pre-commit clean
 	pre-commit install
 
 setup-data-validation:
