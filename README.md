@@ -1,19 +1,21 @@
-Cookiecutter-MLOps
+# Network Anomaly Detection
 ==============================
 
-A cookiecutter template employing MLOps best practices, so you can focus on building machine learning products while
-having MLOps best practices applied.
+A network anomaly project implemented following the cookiecutter template employing MLOps best practices.
+
+## Data Set
+
 
 Instructions
 ------------
-1. Clone the repo.
-2. Run `make dirs` to create the missing parts of the directory structure described below.
+1. Clone the repo: `git clone https://github.com/Danselem/network_anomaly.git`.
+2. Run `cd network_anomaly` to move into the directory.
 3. *Optional:* Run `make virtualenv` to create a python virtual environment. Skip if using conda or some other env manager.
-    1. Run `source env/bin/activate` to activate the virtualenv.
+    1. Run `source .venv/bin/activate` to activate the virtual environment.
 4. Run `make requirements` to install required python packages.
-5. Put the raw data in `data/raw`.
+5. Put the raw data in `data/raw` with the command `python -m src.data.ingest_data`.
 6. To save the raw data to the DVC cache, run `dvc add data/raw`
-7. Edit the code files to your heart's desire.
+7. To preprocess the data, run `python -m src.data.clean_data`.
 8. Process your data, train and evaluate your model using `dvc repro` or `make reproduce`
 9. To run the pre-commit hooks, run `make pre-commit-install`
 10. For setting up data validation tests, run `make setup-setup-data-validation`
@@ -68,11 +70,5 @@ Project Organization
 
 --------
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
-
-
----
-
-To create a project like this, just go to https://dagshub.com/repo/create and select the **Cookiecutter DVC** project template.
 
 Made with 🐶 by [DAGsHub](https://dagshub.com/).

@@ -20,16 +20,14 @@ from src import logger
 
 
 # Configuration constants
-DAGSHUB_REPO_OWNER = "Danselem"
-DAGSHUB_REPO = "network_anomaly"
 seed = 1024
 
 def config_mlflow() -> None:
     """Configure MLflow to log metrics to the Dagshub repository"""
     load_dotenv()
-    os.environ["MLFLOW_TRACKING_USERNAME"] = DAGSHUB_REPO_OWNER
+    os.environ["MLFLOW_TRACKING_USERNAME"] = os.getenv("DAGSHUB_REPO_OWNER")
     os.environ["MLFLOW_TRACKING_PASSWORD"] = os.getenv("DAGSHUB_TOKEN")
-    mlflow.set_tracking_uri(f"https://dagshub.com/{DAGSHUB_REPO_OWNER}/{DAGSHUB_REPO}.mlflow")
+    mlflow.set_tracking_uri(f"https://dagshub.com/{os.getenv("DAGSHUB_REPO_OWNER")}/{os.getenv("DAGSHUB_REPO")}.mlflow")
 
     mlflow.autolog()
     np.random.seed(seed)

@@ -18,6 +18,10 @@ git reset --hard origin/main
 pip install --upgrade pip && pip install -r requirements.txt
 ```
 
+```bash
+python -m src.data.ingest_data
+```
+
 https://www.warp.dev/terminus/undo-git-add
 
 git push origin HEAD:main
