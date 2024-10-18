@@ -3,17 +3,21 @@ import numpy as np
 from hyperopt import STATUS_OK, Trials, fmin, hp, tpe
 from hyperopt.pyll import scope
 from numpy.typing import ArrayLike
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score, precision_score
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 
 seed = 1024
 
 
-def classification_objective(x_train: ArrayLike, y_train: ArrayLike,
-                             model_family: str, loss_function: str,
-                             params: dict) -> dict:
+def classification_objective(
+    x_train: ArrayLike,
+    y_train: ArrayLike,
+    model_family: str,
+    loss_function: str,
+    params: dict,
+) -> dict:
     """Trainable function for classification models.
 
     Args:
@@ -26,27 +30,30 @@ def classification_objective(x_train: ArrayLike, y_train: ArrayLike,
     Returns:
         A dictionary containing the metrics from training.
     """
-    
-    x_train, x_val, y_train, y_val = train_test_split(
-        x_train, y_train, test_size=0.2, random_state=seed)
 
+    x_train, x_val, y_train, y_val = train_test_split(
+        x_train, y_train, test_size=0.2, random_state=seed
+    )
 
     if model_family in ['xgboost', 'random_forest']:
         if model_family == 'xgboost':
             model = XGBClassifier(**params, enable_categorical=True)
         else:
             # Create Random Forest model
-            model = RandomForestClassifier(**params,)
-        
-        
+            model = RandomForestClassifier(
+                **params,
+            )
+
         model.fit(x_train, y_train)
 
         # Predict on the validation set
         y_pred = model.predict(x_val)
 
     else:
-        raise ValueError(f"Unsupported model_family '{model_family}'. "
-                         "Supported families are 'xgboost', and 'random_forest'.")
+        raise ValueError(
+            f"Unsupported model_family '{model_family}'. "
+            "Supported families are 'xgboost', and 'random_forest'."
+        )
 
     # Calculate the loss
     if loss_function == 'F1':
@@ -59,14 +66,18 @@ def classification_objective(x_train: ArrayLike, y_train: ArrayLike,
     return {'loss': loss, 'status': STATUS_OK}
 
 
-def classification_optimization(x_train: ArrayLike, y_train: ArrayLike,
-                                model_family: str, loss_function: str,
-                                objective_function: str,
-                                num_trials: int,
-                                diagnostic: bool = False) -> dict:
+def classification_optimization(
+    x_train: ArrayLike,
+    y_train: ArrayLike,
+    model_family: str,
+    loss_function: str,
+    objective_function: str,
+    num_trials: int,
+    diagnostic: bool = False,
+) -> dict:
     """Optimize hyperparameters for a model using Hyperopt."""
-    
-    if model_family == "random_forest":
+
+    if model_family == 'random_forest':
         max_feature = ['sqrt', 'log2', None]
         bstrap = [True, False]
         criterion = ['gini', 'entropy', 'log_loss']
@@ -78,74 +89,79 @@ def classification_optimization(x_train: ArrayLike, y_train: ArrayLike,
             'min_samples_leaf': scope.int(hp.quniform('min_samples_leaf', 1, 5, 1)),
             'max_features': hp.choice('max_features', max_feature),
             'bootstrap': hp.choice('bootstrap', bstrap),
-            'criterion': hp.choice('criterion',criterion),
+            'criterion': hp.choice('criterion', criterion),
             # 'class_weight': hp.choice('class_weight', cweight)
-            }
-        
-    elif model_family == "xgboost":
+        }
+
+    elif model_family == 'xgboost':
         search_space = {
-            'max_depth': hp.choice("max_depth", np.arange(1, 20, 1, dtype=int)),
-            'eta': hp.uniform("eta", 0, 1),
-            'gamma': hp.uniform("gamma", 0, 100),  # Adjusted upper bound for clarity
-            'reg_alpha': hp.uniform("reg_alpha", 1e-7, 10),
-            'reg_lambda': hp.uniform("reg_lambda", 0, 1),
-            'colsample_bytree': hp.uniform("colsample_bytree", 0.5, 1),
-            'colsample_bynode': hp.uniform("colsample_bynode", 0.5, 1),
-            'colsample_bylevel': hp.uniform("colsample_bylevel", 0.5, 1),
-            'n_estimators': hp.choice("n_estimators", np.arange(10, 1000, 10, dtype=int)),
-            'learning_rate': hp.quniform('learning_rate', 0.001, 0.3, 0.01),  # Will need to convert to float
-            'min_child_weight': hp.choice("min_child_weight", np.arange(1, 10, 1, dtype=int)),
-            'max_delta_step': hp.choice("max_delta_step", np.arange(0, 10, 1, dtype=int)),  # Adjusted range
-            'subsample': hp.uniform("subsample", 0.5, 1),
+            'max_depth': hp.choice('max_depth', np.arange(1, 20, 1, dtype=int)),
+            'eta': hp.uniform('eta', 0, 1),
+            'gamma': hp.uniform('gamma', 0, 100),  # Adjusted upper bound for clarity
+            'reg_alpha': hp.uniform('reg_alpha', 1e-7, 10),
+            'reg_lambda': hp.uniform('reg_lambda', 0, 1),
+            'colsample_bytree': hp.uniform('colsample_bytree', 0.5, 1),
+            'colsample_bynode': hp.uniform('colsample_bynode', 0.5, 1),
+            'colsample_bylevel': hp.uniform('colsample_bylevel', 0.5, 1),
+            'n_estimators': hp.choice(
+                'n_estimators', np.arange(10, 1000, 10, dtype=int)
+            ),
+            'learning_rate': hp.quniform(
+                'learning_rate', 0.001, 0.3, 0.01
+            ),  # Will need to convert to float
+            'min_child_weight': hp.choice(
+                'min_child_weight', np.arange(1, 10, 1, dtype=int)
+            ),
+            'max_delta_step': hp.choice(
+                'max_delta_step', np.arange(0, 10, 1, dtype=int)
+            ),  # Adjusted range
+            'subsample': hp.uniform('subsample', 0.5, 1),
             'objective': 'binary:logistic',
             'eval_metric': 'aucpr',
-            'random_state': seed
-            }
+            'random_state': seed,
+        }
 
     else:
-        raise ValueError(f"Unsupported model_family '{model_family}'. Supported families are 'random_forest', 'catboost', and 'xgboost'.")
+        raise ValueError(
+            f"Unsupported model_family '{model_family}'. Supported families are 'random_forest', 'catboost', and 'xgboost'."
+        )
 
     rstate = np.random.default_rng(seed)
     trials = Trials()
     best_params = fmin(
         fn=lambda params: classification_objective(
-            x_train, y_train, model_family, loss_function, params),
+            x_train, y_train, model_family, loss_function, params
+        ),
         space=search_space,
         algo=tpe.suggest,
         max_evals=num_trials,
         trials=trials,
-        rstate=rstate
+        rstate=rstate,
     )
-    
-    if model_family == "random_forest":
-        
-        best_params['bootstrap'] = bstrap[
-            best_params['bootstrap']]['bootstrap']
-        
-        best_params['max_features'] = max_feature[
-            best_params['max_features']]['max_features']
-        
-        best_params['criterion'] = criterion[
-            best_params['criterion']]['criterion']
-        
+
+    if model_family == 'random_forest':
+        best_params['bootstrap'] = bstrap[best_params['bootstrap']]['bootstrap']
+
+        best_params['max_features'] = max_feature[best_params['max_features']][
+            'max_features'
+        ]
+
+        best_params['criterion'] = criterion[best_params['criterion']]['criterion']
+
         # best_params['class_weight'] = cweight[
         #     best_params['class_weight']]['class_weight']
-        
+
         # Convert specified parameters to integers if they are present
         best_params['max_depth'] = int(best_params['max_depth'])
         best_params['n_estimators'] = int(best_params['n_estimators'])
         best_params['min_samples_split'] = int(best_params['min_samples_split'])
         best_params['min_samples_leaf'] = int(best_params['min_samples_leaf'])
-        
-        
-
-
 
         if diagnostic:
             for i, trial in enumerate(trials.trials):
                 print(f"Trial # {i} result: {trial['result']['loss']}")
 
-    elif model_family == "xgboost":
+    elif model_family == 'xgboost':
         # Convert and handle parameters for xgboost
         best_params['max_depth'] = int(best_params['max_depth'])
         best_params['eta'] = float(best_params['eta'])
@@ -166,6 +182,5 @@ def classification_optimization(x_train: ArrayLike, y_train: ArrayLike,
         if diagnostic:
             for i, trial in enumerate(trials.trials):
                 print(f"Trial # {i} result: {trial['result']['loss']}")
-
 
     return best_params

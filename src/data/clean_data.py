@@ -1,6 +1,8 @@
 """Script to clean the dataset"""
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
 from src import logger
 
 
@@ -23,32 +25,32 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The cleaned dataset
     """
-    logger.info("Original data shape: %s", data.shape)
+    logger.info('Original data shape: %s', data.shape)
     data['label'] = data['label'].apply(lambda x: x.split('.')[0])
-    logger.info("Cleaned data shape: %s", data.shape)
+    logger.info('Cleaned data shape: %s', data.shape)
     return data
 
 
 def main():
     """Main function to clean the dataset"""
     # Check and create interim and processed directories if necessary
-    create_directory_if_not_exists("data/interim")
-    create_directory_if_not_exists("data/processed")
+    create_directory_if_not_exists('data/interim')
+    create_directory_if_not_exists('data/processed')
 
-    logger.info("Cleaning the training dataset")
-    
+    logger.info('Cleaning the training dataset')
+
     # Load the data
-    data = pd.read_parquet("data/interim/kddcup.parquet")
-    
+    data = pd.read_parquet('data/interim/kddcup.parquet')
+
     # Clean the data
     cleaned_data = clean_data(data)
-    
+
     # Save the cleaned data
-    data_path = Path("data/processed/kddcup_cleaned.parquet")
+    data_path = Path('data/processed/kddcup_cleaned.parquet')
     cleaned_data.to_parquet(data_path, index=False)
-    
-    logger.info(f"Cleaned data saved to {data_path}")
+
+    logger.info(f'Cleaned data saved to {data_path}')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

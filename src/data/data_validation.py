@@ -1,6 +1,6 @@
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.core.batch import BatchRequest
 from great_expectations.exceptions import DataContextError
 
 """
@@ -15,14 +15,14 @@ https://dagshub.com/DagsHub/Cookiecutter-MLOps/src/example-project
 context = ge.data_context.DataContext()
 
 batch_request = {
-    "datasource_name": "{{fill in datasource name}}",
-    "data_connector_name": "default_inferred_data_connector_name",
-    "data_asset_name": "{{fill in names of files that have tests}}",  # Define the data files that should be tested
-    "limit": 1000,
+    'datasource_name': '{{fill in datasource name}}',
+    'data_connector_name': 'default_inferred_data_connector_name',
+    'data_asset_name': '{{fill in names of files that have tests}}',  # Define the data files that should be tested
+    'limit': 1000,
 }
 
 # Feel free to change the name of your suite here. Renaming this will not remove the other one.
-expectation_suite_name = "{{fill in your test suite name}}"
+expectation_suite_name = '{{fill in your test suite name}}'
 try:
     suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(
@@ -40,16 +40,16 @@ validator = context.get_validator(
 )
 
 checkpoint_config = {
-    "class_name": "SimpleCheckpoint",
-    "validations": [
+    'class_name': 'SimpleCheckpoint',
+    'validations': [
         {
-            "batch_request": batch_request,
-            "expectation_suite_name": expectation_suite_name,
+            'batch_request': batch_request,
+            'expectation_suite_name': expectation_suite_name,
         }
     ],
 }
 checkpoint = SimpleCheckpoint(
-    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",
+    f'{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}',
     context,
     **checkpoint_config,
 )
